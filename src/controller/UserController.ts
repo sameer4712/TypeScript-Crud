@@ -1,61 +1,65 @@
-import type { User } from "../Model/User";
 import type { Request, Response } from "express";
+import usermodel from "../Model/User.ts";
 
-let users: User[] = [];
-let nextid = 1;
+export const AddUser = async (req: Request, res: Response) => {
+  try {
+    const { name, email, age } = req.body;
 
-export const AddUser = (req:Request,res:Response)=>{
-    try{
-      const {name,email,age}=req.body;
-      if(!name || !email){
-        return res.json("name and email is required")
-      }
-      const newuser : User={
-        id: nextid++,
-        name,
-        email,
-        age
-      }
-      users.push(newuser)
-      return res.json(newuser)
+    if (!name || !email) {
+      return res.status(400).json({ message: "Name and email are required" });
     }
-    catch(err){
-      console.log(err)
-    }
-}
 
-
-export const GetAllUser = (req: Request,res:Response)=>{
-  console.log('reacherd')
-  try{
-    res.json(users)
+    const newUser = await usermodel.insertOne({ name, email, age });
+    return res.status(201).json(newUser);
+  } catch (err) {
+    console.error("Error creating user:", err);
+    return res.status(500).json({ message: "Server error", error: err });
   }
-  catch(err){
-    console.log(err);
-    
-  }
-}
-
-
-export const updateUser = (req: Request, res: Response) => {
-  const id = parseInt(req.params.id as string);
-  const { name, email } = req.body;
-  const user = users.find(u => u.id === id);
-  if (!user) return res.status(404).json({ message: "User not found" });
-
-  if (name) user.name = name;
-  if (email) user.email = email;
-  res.json(`updated user is ${name}`);
 };
 
-export const deleteUser = (req: Request, res: Response) => {
-  const id = parseInt(req.params.id as string);
-  const beforeCount = users.length;
-  users = users.filter(u => u.id !== id);
-
-  if (users.length === beforeCount)
-    return res.status(404).json({ message: "User not found" });
-
-  res.status(204).send(`deleted user is ${users}`);
+export const GetAllUser = async (_req: Request, res: Response) => {
+  try {
+    const users = await usermodel.find();
+    res.json({message:"All users listed",users});
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, email, age } = req.body;
+
+    const updatedUser = await usermodel.findByIdAndUpdate(
+      id,
+      { name, email, age },
+      { new: true } 
+    );
+
+    if (!updatedUser)
+      return res.status(404).json({ message: "User not found" });
+
+    res.json({message:`Updated user is ${updateUser}`});
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const deleteuser = await usermodel.findByIdAndDelete(id);
+
+    if (!deleteuser)
+      return res.status(404).json({ message: "User not found" });
+
+    res.json({ message: `User deleted successfully : username: ${deleteuser.name}` });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
