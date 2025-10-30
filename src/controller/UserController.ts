@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import usermodel from "../Model/User.ts";
 
+
 export const AddUser = async (req: Request, res: Response) => {
   try {
     const { name, email, age } = req.body;
@@ -17,7 +18,7 @@ export const AddUser = async (req: Request, res: Response) => {
   }
 };
 
-export const GetAllUser = async (_req: Request, res: Response) => {
+export const GetAllUser = async (req: Request, res: Response) => {
   try {
     const users = await usermodel.find();
     res.json({message:"All users listed",users});
