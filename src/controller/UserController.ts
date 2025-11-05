@@ -3,6 +3,7 @@ import usermodel from "../Model/User.ts";
 
 
 export const AddUser = async (req: Request, res: Response) => {
+  
   try {
     const { name, email, age } = req.body;
 
@@ -52,7 +53,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    
+
     const { id } = req.params;
 
     const deleteuser = await usermodel.findByIdAndDelete(id);
