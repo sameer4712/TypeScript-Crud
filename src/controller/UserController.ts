@@ -19,6 +19,7 @@ export const AddUser = async (req: Request, res: Response) => {
   }
 };
 
+
 export const GetAllUser = async (req: Request, res: Response) => {
   try {
     const users = await usermodel.find();
